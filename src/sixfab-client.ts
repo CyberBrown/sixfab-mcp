@@ -3,6 +3,7 @@ import type { Env } from './types.ts';
 interface SixfabApiResponse {
   status?: string;
   data?: unknown;
+  detail?: unknown;
   message?: string;
   [key: string]: unknown;
 }
@@ -48,7 +49,7 @@ export class SixfabClient {
     const json = await response.json() as SixfabApiResponse;
 
     if (!response.ok) {
-      const msg = json.message || `HTTP ${response.status}`;
+      const msg = json.message || json.detail as string || `HTTP ${response.status}`;
       throw new Error(`Sixfab API error: ${msg} (status ${response.status})`);
     }
 
@@ -60,19 +61,19 @@ export class SixfabClient {
   // ========================================
 
   async listAssets() {
-    return this.request('GET', '/asset/');
+    return this.request('GET', '/assets');
   }
 
   async registerAsset(data: { token: string; name?: string }) {
-    return this.request('POST', '/asset/', undefined, data);
+    return this.request('POST', '/assets', undefined, data);
   }
 
   async getAsset(id: string) {
-    return this.request('GET', `/asset/${encodeURIComponent(id)}/`);
+    return this.request('GET', `/assets/${encodeURIComponent(id)}`);
   }
 
   async updateAsset(id: string, data: { name?: string; description?: string }) {
-    return this.request('PUT', `/asset/${encodeURIComponent(id)}/`, undefined, data);
+    return this.request('PATCH', `/assets/${encodeURIComponent(id)}`, undefined, data);
   }
 
   // ========================================
@@ -80,19 +81,19 @@ export class SixfabClient {
   // ========================================
 
   async updateSim(id: string, data: { apn?: string; pin?: string }) {
-    return this.request('PUT', `/asset/${encodeURIComponent(id)}/sim/`, undefined, data);
+    return this.request('PATCH', `/assets/${encodeURIComponent(id)}/sim`, undefined, data);
   }
 
   async getSimUsage(id: string, params?: { start?: string; end?: string; interval?: string }) {
-    return this.request('GET', `/asset/${encodeURIComponent(id)}/sim/usage/`, params);
+    return this.request('GET', `/assets/${encodeURIComponent(id)}/sim/usages`, params);
   }
 
   // ========================================
-  // DEVICE STATUS
+  // DEVICE STATUS (via ALPON)
   // ========================================
 
   async getDeviceStatus(id: string) {
-    return this.request('GET', `/asset/${encodeURIComponent(id)}/status/`);
+    return this.request('GET', `/assets/${encodeURIComponent(id)}/alpon`);
   }
 
   // ========================================
@@ -100,19 +101,19 @@ export class SixfabClient {
   // ========================================
 
   async listContainers(id: string) {
-    return this.request('GET', `/asset/${encodeURIComponent(id)}/container/`);
+    return this.request('GET', `/assets/${encodeURIComponent(id)}/alpon/containers`);
   }
 
   async deployContainer(id: string, data: { image: string; name: string; ports?: Record<string, string>; env?: Record<string, string> }) {
-    return this.request('POST', `/asset/${encodeURIComponent(id)}/container/`, undefined, data);
+    return this.request('POST', `/assets/${encodeURIComponent(id)}/alpon/containers`, undefined, data);
   }
 
-  async deleteContainer(id: string, containerId: string) {
-    return this.request('DELETE', `/asset/${encodeURIComponent(id)}/container/${encodeURIComponent(containerId)}/`);
+  async deleteContainer(id: string, containerName: string) {
+    return this.request('DELETE', `/assets/${encodeURIComponent(id)}/alpon/containers/${encodeURIComponent(containerName)}`);
   }
 
-  async updateContainer(id: string, containerId: string, data: { action: string }) {
-    return this.request('PUT', `/asset/${encodeURIComponent(id)}/container/${encodeURIComponent(containerId)}/`, undefined, data);
+  async updateContainer(id: string, containerName: string, data: { action: string }) {
+    return this.request('PATCH', `/assets/${encodeURIComponent(id)}/alpon/containers/${encodeURIComponent(containerName)}`, undefined, data);
   }
 
   // ========================================
@@ -120,15 +121,15 @@ export class SixfabClient {
   // ========================================
 
   async getEsimProfiles(id: string) {
-    return this.request('GET', `/asset/${encodeURIComponent(id)}/esim/`);
+    return this.request('GET', `/assets/${encodeURIComponent(id)}/alpon/esim`);
   }
 
   async downloadEsimProfile(id: string, data: { activation_code: string }) {
-    return this.request('POST', `/asset/${encodeURIComponent(id)}/esim/download/`, undefined, data);
+    return this.request('POST', `/assets/${encodeURIComponent(id)}/alpon/esim`, undefined, data);
   }
 
   async switchEsimProfile(id: string, data: { iccid: string }) {
-    return this.request('POST', `/asset/${encodeURIComponent(id)}/esim/switch/`, undefined, data);
+    return this.request('PATCH', `/assets/${encodeURIComponent(id)}/alpon/esim`, undefined, data);
   }
 
   // ========================================
@@ -136,7 +137,7 @@ export class SixfabClient {
   // ========================================
 
   async getDeviceLocation(id: string) {
-    return this.request('GET', `/asset/${encodeURIComponent(id)}/location/`);
+    return this.request('GET', `/assets/${encodeURIComponent(id)}/alpon/location`);
   }
 
   // ========================================
@@ -144,15 +145,15 @@ export class SixfabClient {
   // ========================================
 
   async getNetworkMonitor(id: string) {
-    return this.request('GET', `/asset/${encodeURIComponent(id)}/network/monitor/`);
+    return this.request('GET', `/assets/${encodeURIComponent(id)}/alpon/network`);
   }
 
   async getInterfacePriorities(id: string) {
-    return this.request('GET', `/asset/${encodeURIComponent(id)}/network/priority/`);
+    return this.request('GET', `/assets/${encodeURIComponent(id)}/alpon/network_priority`);
   }
 
   async setInterfacePriorities(id: string, data: { priorities: string[] }) {
-    return this.request('PUT', `/asset/${encodeURIComponent(id)}/network/priority/`, undefined, data);
+    return this.request('PATCH', `/assets/${encodeURIComponent(id)}/alpon/network_priority`, undefined, data);
   }
 
   // ========================================
@@ -160,11 +161,11 @@ export class SixfabClient {
   // ========================================
 
   async getDeviceMonitor(id: string) {
-    return this.request('GET', `/asset/${encodeURIComponent(id)}/monitor/device/`);
+    return this.request('GET', `/assets/${encodeURIComponent(id)}/alpon/device`);
   }
 
   async getModemMonitor(id: string) {
-    return this.request('GET', `/asset/${encodeURIComponent(id)}/monitor/modem/`);
+    return this.request('GET', `/assets/${encodeURIComponent(id)}/alpon/modem`);
   }
 
   // ========================================
@@ -172,7 +173,7 @@ export class SixfabClient {
   // ========================================
 
   async getRemoteTerminalCode(id: string) {
-    return this.request('GET', `/asset/${encodeURIComponent(id)}/remote-terminal/`);
+    return this.request('GET', `/assets/${encodeURIComponent(id)}/alpon/terminal_access_code`);
   }
 
   // ========================================
@@ -180,6 +181,6 @@ export class SixfabClient {
   // ========================================
 
   async listNetworks() {
-    return this.request('GET', '/network/');
+    return this.request('GET', '/networks');
   }
 }

@@ -230,13 +230,13 @@ export function createSixfabMcpHandler(env: Env) {
     {
       passphrase: passphraseParam,
       id: z.string().describe('Asset/device ID'),
-      containerId: z.string().describe('Container ID to delete'),
+      containerName: z.string().describe('Container name to delete'),
     },
-    async ({ passphrase, id, containerId }) => {
+    async ({ passphrase, id, containerName }) => {
       const authErr = validatePassphrase(passphrase, env.WRITE_PASSPHRASE);
       if (authErr) return authErr;
       try {
-        const result = await client.deleteContainer(id, containerId);
+        const result = await client.deleteContainer(id, containerName);
         return { content: [{ type: 'text' as const, text: JSON.stringify(result, null, 2) }] };
       } catch (e) {
         return ERROR_RESULT((e as Error).message);
@@ -250,14 +250,14 @@ export function createSixfabMcpHandler(env: Env) {
     {
       passphrase: passphraseParam,
       id: z.string().describe('Asset/device ID'),
-      containerId: z.string().describe('Container ID'),
+      containerName: z.string().describe('Container name'),
       action: z.string().describe('Action to perform: "start", "stop", or "restart"'),
     },
-    async ({ passphrase, id, containerId, action }) => {
+    async ({ passphrase, id, containerName, action }) => {
       const authErr = validatePassphrase(passphrase, env.WRITE_PASSPHRASE);
       if (authErr) return authErr;
       try {
-        const result = await client.updateContainer(id, containerId, { action });
+        const result = await client.updateContainer(id, containerName, { action });
         return { content: [{ type: 'text' as const, text: JSON.stringify(result, null, 2) }] };
       } catch (e) {
         return ERROR_RESULT((e as Error).message);
