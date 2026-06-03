@@ -1,6 +1,5 @@
 import { z } from 'zod';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
-import { createMcpHandler } from 'agents/mcp';
 import type { Env } from './types.ts';
 import { SixfabClient } from './sixfab-client.ts';
 
@@ -18,7 +17,7 @@ function validatePassphrase(provided: string | undefined, expected: string): Ret
 
 const passphraseParam = z.string().describe('Authentication passphrase');
 
-export function createSixfabMcpHandler(env: Env) {
+export function buildSixfabServer(env: Env): McpServer {
   const server = new McpServer({
     name: 'sixfab-mcp',
     version: '1.0.0',
@@ -500,5 +499,5 @@ export function createSixfabMcpHandler(env: Env) {
     }
   );
 
-  return createMcpHandler(server);
+  return server;
 }

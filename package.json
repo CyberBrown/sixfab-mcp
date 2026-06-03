@@ -1,27 +1,22 @@
 {
   "name": "sixfab-mcp",
-  "module": "src/index.ts",
-  "type": "module",
+  "version": "1.0.0",
   "private": true,
+  "type": "module",
+  "main": "dist/server.js",
   "scripts": {
-    "dev": "bunx wrangler dev",
-    "deploy": "bunx wrangler deploy",
-    "secret:list": "bunx wrangler secret list",
-    "secret:put": "bunx wrangler secret put"
-  },
-  "devDependencies": {
-    "@cloudflare/workers-types": "^4.20260317.1",
-    "@types/bun": "latest",
-    "wrangler": "^4.75.0"
-  },
-  "peerDependencies": {
-    "typescript": "^5"
+    "build": "esbuild src/server.ts --bundle --platform=node --format=esm --target=node22 --outfile=dist/server.js --banner:js=\"import{createRequire}from'module';const require=createRequire(import.meta.url);\"",
+    "start": "node dist/server.js",
+    "dev": "node --experimental-strip-types --no-warnings src/server.ts"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "1.23.0",
-    "agents": "^0.7.9",
-    "hono": "^4.12.8",
     "zod": "^4.3.6"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "esbuild": "^0.24.0",
+    "typescript": "^5"
   },
   "overrides": {
     "@modelcontextprotocol/sdk": "1.23.0"

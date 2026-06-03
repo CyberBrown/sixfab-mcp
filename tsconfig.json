@@ -13,7 +13,7 @@
     "skipLibCheck": true,
     "noFallthroughCasesInSwitch": true,
     "noUncheckedIndexedAccess": true,
-    "types": ["@cloudflare/workers-types"]
+    "types": ["node"]
   },
   "include": ["src/**/*"]
 }
